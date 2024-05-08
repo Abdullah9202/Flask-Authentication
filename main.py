@@ -11,7 +11,11 @@ app.config['SECRET_KEY'] = 'iwfL#R,3dWQE4DE#Dd'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Init Flask App with DB
-db.__init__(app)
+db.init_app(app)
+
+# Init Flask App with Login Manager
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 # Line below only required once, when creating DB. 
 # db.create_all()
