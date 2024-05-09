@@ -29,7 +29,7 @@ def home():
     return render_template("index.html")
 
 
-@app.route('/register', method=["GET", "POST"])
+@app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         # Registering the new user
@@ -38,12 +38,17 @@ def register():
             email=request.form.get("email"),
             password=request.form.get("password"),
         )
-        # Adding in DB
-        db.session.add(new_user)
-        db.session.commit()
-        # Returning the secret page in case of success
-        return redirect(url_for("secrets"))
+        # Check if the email is already registered
+        if User.query.filter_by(email=new_user.email).first() is None:
+            # Adding in DB
+            db.session.add(new_user)
+            db.session.commit()
+            # Returning the secret page in case of success
+            return redirect(url_for("secrets"))
+        else:
+            flash("This email is already registered", "error")
     return render_template("register.html")
+
 
 
 @app.route('/login')
