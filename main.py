@@ -23,12 +23,12 @@ login_manager.init_app(app)
 # Line below only required once, when creating DB. 
 # db.create_all()
 
-
+# Home Route
 @app.route('/')
 def home():
     return render_template("index.html")
 
-
+# Register user Route
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -49,17 +49,16 @@ def register():
             flash("This email is already registered", "error")
     return render_template("register.html")
 
-
-
-@app.route('/login')
+# Login user Route
+@app.route('/login', methods=["GET", "POST"])
 def login():
     form = User()
-    if request.method == "GET":
+    if request.method == "POST":
         # Getting the user details
         email = request.form.get("email")
         password = request.form.get("password")
         # Fetching the user from DB
-        user = db.session.query(User).filter_by(email=email)
+        user = User.query.filter_by(email=email).first() # Running the query first
         # Validation for user
         if user:
             # Checking the password
@@ -69,22 +68,22 @@ def login():
                 # Redirecting the user in case of success
                 return redirect(url_for("secrets"))
             else:
-                return flash("Invalid email or password", "error")
+                flash("Invalid email or password", "error")
         else:
-            return flash("Invalid email or password", "error")
+            flash("Invalid email or password", "error")
     return render_template("login.html", form=form)
 
-
+# Secrets Route
 @app.route('/secrets')
 def secrets():
     return render_template("secrets.html")
 
-
+# Logout Route
 @app.route('/logout')
 def logout():
     pass
 
-
+# Download Route
 @app.route('/download')
 def download():
     pass
