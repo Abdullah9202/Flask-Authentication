@@ -1,4 +1,5 @@
 from flask_login import LoginManager
+# My Files (Classes)
 from classes.user_class import db, User
 
 login_manager = LoginManager()
