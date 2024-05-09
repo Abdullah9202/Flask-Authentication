@@ -20,13 +20,12 @@ db.init_app(app)
 # Init the App with LoginManager
 login_manager.init_app(app)
 
-# Line below only required once, when creating DB. 
-# db.create_all()
 
 # Home Route
 @app.route('/')
 def home():
     return render_template("index.html")
+
 
 # Register user Route
 @app.route('/register', methods=["GET", "POST"])
@@ -48,6 +47,7 @@ def register():
         else:
             flash("This email is already registered", "error")
     return render_template("register.html")
+
 
 # Login user Route
 @app.route('/login', methods=["GET", "POST"])
@@ -73,22 +73,28 @@ def login():
             flash("Invalid email or password", "error")
     return render_template("login.html", form=form)
 
+
 # Secrets Route
 @app.route('/secrets')
 def secrets():
     return render_template("secrets.html")
+
 
 # Logout Route
 @app.route('/logout')
 def logout():
     pass
 
+
 # Download Route
 @app.route('/download')
 def download():
-    pass
+    return send_from_directory('static', "files/cheat_sheet.pdf", as_attachment=True)
 
 
 # Executing as script
 if __name__ == "__main__":
+    # Line below only required once, when creating DB. 
+    with app.app_context():
+        db.create_all()
     app.run(debug=True, host="127.0.0.1", port="8080")
