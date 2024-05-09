@@ -4,7 +4,7 @@ from flask_login import login_user, login_required, current_user, logout_user
 # My Files (Classes)
 from classes.user_class import db, User
 # My Files (Functions)
-from Functions.user_load_func import login_manager
+from Functions.user_load_func import login_manager, load_user
 
 # Init Flask App
 app = Flask(__name__)
@@ -34,8 +34,28 @@ def register():
     return render_template("register.html")
 
 
-@app.route('/login')
+@app.route('/login', methods=["GET", "POST"])
 def login():
+    form = User()
+    # Validating the form
+    if form.validate_on_submit():
+        # Getting the user details
+        email = form.email.data
+        password = form.password.data
+        # Fetching the user from DB
+        user = db.session.query(User).filter_by(email=email)
+        # Validation for user
+        if user:
+            # Checking the password
+            if check_password_hash(user.password, password):
+                # Logging the user in
+                login_user(user)
+                # Redirecting the user in case of success
+                return redirect(url_for("secrets"))
+            else:
+                return flash("Invalid email or password", "error")
+        else:
+            return flash("Invalid email or password", "error")
     return render_template("login.html")
 
 
