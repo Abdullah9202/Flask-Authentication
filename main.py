@@ -29,19 +29,30 @@ def home():
     return render_template("index.html")
 
 
-@app.route('/register')
+@app.route('/register', method=["GET", "POST"])
 def register():
+    if request.method == "POST":
+        # Registering the new user
+        new_user = User(
+            name=request.form.get("name"),
+            email=request.form.get("email"),
+            password=request.form.get("password"),
+        )
+        # Adding in DB
+        db.session.add(new_user)
+        db.session.commit()
+        # Returning the secret page in case of success
+        return redirect(url_for("secrets"))
     return render_template("register.html")
 
 
-@app.route('/login', methods=["GET", "POST"])
+@app.route('/login')
 def login():
     form = User()
-    # Validating the form
-    if form.validate_on_submit():
+    if request.method == "GET":
         # Getting the user details
-        email = form.email.data
-        password = form.password.data
+        email = request.form.get("email")
+        password = request.form.get("password")
         # Fetching the user from DB
         user = db.session.query(User).filter_by(email=email)
         # Validation for user
@@ -56,7 +67,7 @@ def login():
                 return flash("Invalid email or password", "error")
         else:
             return flash("Invalid email or password", "error")
-    return render_template("login.html")
+    return render_template("login.html", form=form)
 
 
 @app.route('/secrets')
