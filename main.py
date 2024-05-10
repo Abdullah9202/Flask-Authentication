@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash, gen_salt
 from flask_login import login_user, login_required, current_user, logout_user
 # My Files (Classes)
 from classes.user_class import db, User
@@ -31,11 +31,13 @@ def home():
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        # Hashing and Salting the password
+        hashed_Salted_Password = generate_password_hash(request.form.get("password"), method="pbkdf2:sha256", salt_length=8)
         # Registering the new user
         new_user = User(
             name=request.form.get("name"),
             email=request.form.get("email"),
-            password=generate_password_hash(request.form.get("password")), # Storing the hashed password in DB
+            password=hashed_Salted_Password, # Storing the hashed + salted password in DB
         )
         # Check if the email is already registered
         if User.query.filter_by(email=new_user.email).first() is None:
@@ -53,26 +55,25 @@ def register():
 @app.route('/login', methods=["GET", "POST"])
 def login():
     form = User()
-    if request.method == "POST":
-        # Getting the user details
-        email = request.form.get("email")
-        password = request.form.get("password")
-        # Fetching the user from DB
-        user = User.query.filter_by(email=email).first() # Running the query first
-        # Validation for user
-        if user:
-            # Checking the password
-            if check_password_hash():
-                # Logging the user in
-                login_user(user)
-                # Redirecting the user in case of success
-                return redirect(url_for("secrets"))
-            else:
-                flash("Invalid email or password", "error")
-                return redirect(url_for("login"))
-        else:
-            flash("User does not exist.", "error")
-            return redirect(url_for("login"))
+    
+    # Getting the user details
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    # Checking if the email exists in DB
+    if not User.query.filter_by(email=email).first():
+        flash("Email does not exists", "error")
+        return redirect(url_for("login.html"))
+
+    # Getting the hashed and salted password from DB
+    hashed_Salted_Password = User.query.filter_by(email=email).get("password")
+
+    # Checking if the password is incorrect
+    if not check_password_hash(hashed_Salted_Password, password):
+        flash("Incorrect password", "error")
+        return redirect(url_for("login.html"))
+    
+    # Rendering the login page in case of success
     return render_template("login.html", form=form)
 
 
