@@ -35,7 +35,7 @@ def register():
         new_user = User(
             name=request.form.get("name"),
             email=request.form.get("email"),
-            password=request.form.get("password"),
+            password=generate_password_hash(request.form.get("password")), # Storing the hashed password in DB
         )
         # Check if the email is already registered
         if User.query.filter_by(email=new_user.email).first() is None:
@@ -62,15 +62,17 @@ def login():
         # Validation for user
         if user:
             # Checking the password
-            if check_password_hash(user.password, password):
+            if check_password_hash():
                 # Logging the user in
                 login_user(user)
                 # Redirecting the user in case of success
                 return redirect(url_for("secrets"))
             else:
                 flash("Invalid email or password", "error")
+                return redirect(url_for("login"))
         else:
-            flash("Invalid email or password", "error")
+            flash("User does not exist.", "error")
+            return redirect(url_for("login"))
     return render_template("login.html", form=form)
 
 
