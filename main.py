@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory
-from werkzeug.security import generate_password_hash, check_password_hash, gen_salt
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, current_user, logout_user
 # My Files (Classes)
 from classes.user_class import db, User
@@ -79,18 +79,23 @@ def login():
 
 # Secrets Route
 @app.route('/secrets')
+@login_required # Login Required as decor
 def secrets():
-    return render_template("secrets.html")
+    # Getting the name of the user
+    name = current_user.name
+    return render_template("secrets.html", userName=name)
 
 
 # Logout Route
 @app.route('/logout')
 def logout():
-    pass
+    logout_user()
+    redirect(url_for("home"))
 
 
 # Download Route
 @app.route('/download')
+@login_required # Login Required as decor
 def download():
     return send_from_directory('static', "files/cheat_sheet.pdf", as_attachment=True)
 
