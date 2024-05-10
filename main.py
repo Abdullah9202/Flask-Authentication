@@ -54,27 +54,27 @@ def register():
 # Login user Route
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    form = User()
-    
-    # Getting the user details
-    email = request.form.get("email")
-    password = request.form.get("password")
-
-    # Checking if the email exists in DB
-    if not User.query.filter_by(email=email).first():
-        flash("Email does not exists", "error")
-        return redirect(url_for("login.html"))
-
-    # Getting the hashed and salted password from DB
-    hashed_Salted_Password = User.query.filter_by(email=email).get("password")
-
-    # Checking if the password is incorrect
-    if not check_password_hash(hashed_Salted_Password, password):
-        flash("Incorrect password", "error")
-        return redirect(url_for("login.html"))
-    
+    # Validation for request method
+    if request.method == "POST":
+        # Getting the user details
+        email = request.form.get("email")
+        password = request.form.get("password")
+        # Getting the user form DB
+        user = User.query.filter_by(email=email).first()
+        # Validating the user
+        if user:
+            # Validating the password 
+            if check_password_hash(user.password, password):
+                login_user(user)
+                return redirect(url_for("secrets"))
+            else:
+                flash("Incorrect password or email", "error")
+                return redirect(url_for("login"))
+        else:
+            flash("Email does not exist", "error")
+            return redirect(url_for("login"))
     # Rendering the login page in case of success
-    return render_template("login.html", form=form)
+    return render_template("login.html")
 
 
 # Secrets Route
@@ -100,4 +100,4 @@ if __name__ == "__main__":
     # Line below only required once, when creating DB. 
     with app.app_context():
         db.create_all()
-    app.run(debug=True, host="127.0.0.1", port="8080")
+    app.run(debug=True, host="127.0.0.1", port="5000")
