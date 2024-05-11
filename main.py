@@ -83,14 +83,14 @@ def login():
 def secrets():
     # Getting the name of the user
     name = current_user.name
-    return render_template("secrets.html", userName=name)
+    return render_template("secrets.html", userName=name, logged_in=True)
 
 
 # Logout Route
 @app.route('/logout')
 def logout():
     logout_user()
-    redirect(url_for("home"))
+    return redirect(url_for("home"))
 
 
 # Download Route
