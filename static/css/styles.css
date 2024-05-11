@@ -72,6 +72,6 @@ input:focus { box-shadow: inset 0 -5px 45px rgba(100,100,100,0.4), 0 1px 1px rgb
 
 /* CSS for Flash message */
 div.flash_msg div {
-	color: #ffffff;
+	color: #ff0000;
 	font-size: large;
 }
